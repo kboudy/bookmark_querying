@@ -117,8 +117,8 @@ const queryBookmarks = () => {
   for (const b of sorted) {
     let nameMatch;
     let urlMatch;
-    if (argv.grep) {
-      const regEx = new RegExp(argv.grep, "i");
+    if (argv.query) {
+      const regEx = new RegExp(argv.query, "i");
       nameMatch = b.name.match(regEx);
       urlMatch = b.url.match(regEx);
       if (!nameMatch && !urlMatch) {
