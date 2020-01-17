@@ -15,10 +15,10 @@ bq --help
 bq
 
 # filter bookmarks whose url or name includes "foo" or "bar"
-bq -g "(foo|bar)"
+bq -q "(foo|bar)"
 
 # delete those
-bq -g "(foo|bar)" -d
+bq -q "(foo|bar)" -d
 
 # sort results by added date, ascending
 bq -s

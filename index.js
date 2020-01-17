@@ -57,10 +57,10 @@ const { argv } = require("yargs")
     type: "string",
     description: "Comma-delimited field names (date_added,name,url)"
   })
-  .option("grep", {
-    alias: "g",
+  .option("query", {
+    alias: "q",
     type: "string",
-    description: "regex to grep"
+    description: "regex for query (against the url & bookmark name)"
   })
   .option("launch", {
     alias: "l",
