@@ -53,6 +53,7 @@ function formatAndLocalizeDate(st_dt) {
 
 const { argv } = require("yargs")
   .alias("help", "h")
+  .version(false)
   .option("fields", {
     alias: "f",
     type: "string",
