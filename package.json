@@ -1,0 +1,30 @@
+{
+  "name": "bq",
+  "version": "1.0.0",
+  "description": "- query brave bookmarks from command line",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "bq": "bin/bq"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kboudy/bookmark_querying.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kboudy/bookmark_querying/issues"
+  },
+  "homepage": "https://github.com/kboudy/bookmark_querying#readme",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "moment": "^2.24.0",
+    "opn": "^6.0.0",
+    "yargs": "^15.1.0"
+  }
+}
