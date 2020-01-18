@@ -57,7 +57,7 @@ const { argv } = require("yargs")
   .option("fields", {
     alias: "f",
     type: "string",
-    description: "Comma-delimited field names (date_added,name,url)"
+    description: "Comma-delimited field names (#,date_added,name,url)"
   })
   .option("query", {
     alias: "q",
@@ -66,8 +66,10 @@ const { argv } = require("yargs")
   })
   .option("launch", {
     alias: "l",
-    type: "boolean",
-    description: "launch most recent bookark url in default browser"
+    default: "1",
+    type: "string",
+    description:
+      "launch first url (or #'d, if you supply it) in default browser"
   })
   .option("delete", {
     alias: "d",
@@ -98,7 +100,7 @@ const queryBookmarks = () => {
   const bookmarkJson = JSON.parse(fs.readFileSync(config.bookmarkPath));
   const flattened = gatherAllBookmarks(bookmarkJson);
 
-  const availableFields = ["date_added", "name", "url"];
+  const availableFields = ["#", "date_added", "name", "url"];
   const outputFields = [];
   for (const f of (argv.fields || availableFields.join(","))
     .split(",")
@@ -115,6 +117,7 @@ const queryBookmarks = () => {
     sorted = flattened.sort((a, b) => a.date_added - b.date_added);
   }
   const matches = [];
+  let resultNumber = 0;
   for (const b of sorted) {
     let nameMatch;
     let urlMatch;
@@ -126,12 +129,15 @@ const queryBookmarks = () => {
         continue;
       }
     }
+    resultNumber++;
 
     let outString = "";
     let isFirst = true;
     for (const f of outputFields) {
       let renderedField = b[f];
-      if (f === "date_added") {
+      if (f === "#") {
+        renderedField = `${resultNumber}`;
+      } else if (f === "date_added") {
         renderedField = formatAndLocalizeDate(b[f]);
       } else if (f === "url" && urlMatch) {
         const beforeMatch = b[f].slice(0, urlMatch.index);
@@ -165,13 +171,25 @@ const queryBookmarks = () => {
     console.log(chalk.green(`${matches.length} bookmarks`));
   }
   if (argv.launch) {
-    if (matches.length === 0) {
-      console.log(chalk.red("There were no matches to launch"));
-    } else {
-      const descendingSort = matches.sort(
-        (a, b) => a.date_added - b.date_added
-      );
-      opn(descendingSort[descendingSort.length - 1].url);
+    // because a yargs default (of "1") is supplied for the launch arg, it always says the switch is present
+    // there must be a yargs way to check if it actually was typed, but for now, I'm manually checking
+    const launchSwitchExists =
+      process.argv.filter(a => a === "-l" || a === "-launch").length > 0;
+    if (launchSwitchExists) {
+      if (matches.length === 0) {
+        console.log(chalk.red("There were no matches to launch"));
+      } else {
+        const launchIndex = parseInt(argv.launch) - 1;
+        if (isNaN(launchIndex)) {
+          console.log(
+            chalk.red(`"${argv.launch}": launch # should be an integer`)
+          );
+        } else if (launchIndex < 0 || launchIndex >= matches.length) {
+          console.log(chalk.red(`${argv.launch}: No such result # to launch`));
+        } else {
+          opn(matches[launchIndex].url);
+        }
+      }
     }
   }
 };
