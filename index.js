@@ -93,6 +93,8 @@ const deleteBookmarks = (bookmarkJson, flattened, urlsToDelete) => {
   const survivors = flattened.filter(f => !urlsToDelete.includes(f.url));
   stripped.roots.bookmark_bar.children = survivors;
   fs.writeFileSync(config.bookmarkPath, JSON.stringify(stripped));
+  console.log(chalk.red(urlsToDelete.join("\n")));
+  console.log();
   console.log(chalk.red(`Deleted ${urlsToDelete.length} bookmarks`));
 };
 
