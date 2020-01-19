@@ -73,7 +73,8 @@ const { argv } = require("yargs")
   })
   .option("delete", {
     alias: "d",
-    type: "boolean",
+    default: "*",
+    type: "string",
     description: "delete queried bookmarks"
   })
   .option("sort", {
@@ -87,13 +88,12 @@ const { argv } = require("yargs")
     description: "sort by date added, descending"
   });
 
-const deleteBookmarks = (bookmarkJson, flattened, matches) => {
+const deleteBookmarks = (bookmarkJson, flattened, urlsToDelete) => {
   const stripped = stripBookmarks(bookmarkJson);
-  const urlsToDelete = matches.map(m => m.url);
   const survivors = flattened.filter(f => !urlsToDelete.includes(f.url));
   stripped.roots.bookmark_bar.children = survivors;
   fs.writeFileSync(config.bookmarkPath, JSON.stringify(stripped));
-  console.log(chalk.red(`Deleted ${matches.length} bookmarks`));
+  console.log(chalk.red(`Deleted ${urlsToDelete.length} bookmarks`));
 };
 
 const queryBookmarks = () => {
@@ -166,7 +166,24 @@ const queryBookmarks = () => {
     console.log(chalk.white(outString));
   }
   if (argv.delete) {
-    deleteBookmarks(bookmarkJson, flattened, matches);
+    // because a yargs default (of "1") is supplied for the launch arg, it always says the switch is present
+    // there must be a yargs way to check if it actually was typed, but for now, I'm manually checking
+    const deleteSwitchExists =
+      process.argv.filter(a => a === "-d" || a === "-delete").length > 0;
+    if (deleteSwitchExists) {
+      let urlsToDelete = matches.map(m => m.url);
+      if (argv.delete !== "*") {
+        const lineNumbersToDelete = argv.delete
+          .split(",")
+          .map(n => parseInt(n));
+        const newUrls = [];
+        for (const l of lineNumbersToDelete) {
+          newUrls.push(urlsToDelete[l - 1]);
+        }
+        urlsToDelete = newUrls;
+      }
+      deleteBookmarks(bookmarkJson, flattened, urlsToDelete);
+    }
   } else {
     console.log(chalk.green(`${matches.length} bookmarks`));
   }

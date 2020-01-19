@@ -20,6 +20,9 @@ bq -q "(foo|bar)"
 # delete those
 bq -q "(foo|bar)" -d
 
+# delete specific result #'s
+bq -q "(foo|bar)" -d 1,3,9
+
 # sort results by added date, ascending
 bq -s
 # descending
