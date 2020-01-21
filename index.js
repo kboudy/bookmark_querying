@@ -3,13 +3,33 @@
 const chalk = require("chalk"),
   opn = require("opn"),
   fs = require("fs"),
+  homedir = require("os").homedir(),
   path = require("path"),
   moment = require("moment"),
   commonHelpers = require("./commonHelpers");
 
 const { gatherAllBookmarks, stripBookmarks } = commonHelpers;
 
-const homedir = require("os").homedir();
+const writeCompletionFile = () => {
+  const fp = path.join(homedir, ".config/zsh/completions/_bq");
+  if (!fs.existsSync(path.dirname(fp))) {
+    mkdirp.sync(path.dirname(fp));
+  }
+  if (!fs.existsSync(fp)) {
+    let completionFile = `#compdef bq\n\n_arguments`;
+
+    for (const o in argOptions) {
+      const item = argOptions[o];
+      completionFile =
+        completionFile +
+        ` '-${item.alias}[${item.description.replace(
+          "'",
+          "''"
+        )}]' '--${o}[${item.description.replace("'", "''")}]'`;
+    }
+    fs.writeFileSync(fp, completionFile);
+  }
+};
 
 const homeConfig = path.join(require("os").homedir(), ".config");
 if (!fs.existsSync(homeConfig)) {
@@ -51,42 +71,46 @@ function formatAndLocalizeDate(st_dt) {
   return moment(past + millis + offset * 60000).format("YYYY-MM-DD HH:mm:ss");
 }
 
-const { argv } = require("yargs")
-  .alias("help", "h")
-  .version(false)
-  .option("fields", {
+const argOptions = {
+  fields: {
     alias: "f",
     type: "string",
     description: "Comma-delimited field names (#,date_added,name,url)"
-  })
-  .option("query", {
+  },
+  query: {
     alias: "q",
     type: "string",
     description: "regex for query (against the url & bookmark name)"
-  })
-  .option("launch", {
+  },
+  launch: {
     alias: "l",
     default: "1",
     type: "string",
     description:
       "launch first url (or #'d, if you supply it) in default browser"
-  })
-  .option("delete", {
+  },
+  delete: {
     alias: "d",
     default: "*",
     type: "string",
     description: "delete queried bookmarks"
-  })
-  .option("sort", {
+  },
+  sort: {
     alias: "s",
     type: "boolean",
     description: "sort by date added"
-  })
-  .option("sort_descending", {
+  },
+  sort_descending: {
     alias: "S",
     type: "boolean",
     description: "sort by date added, descending"
-  });
+  }
+};
+
+const { argv } = require("yargs")
+  .alias("help", "h")
+  .version(false)
+  .options(argOptions);
 
 const deleteBookmarks = (bookmarkJson, flattened, urlsToDelete) => {
   const stripped = stripBookmarks(bookmarkJson);
@@ -219,7 +243,7 @@ const debugging =
 if (debugging) {
   queryBookmarks();
 }
-
+writeCompletionFile();
 module.exports = () => {
   queryBookmarks();
 };
