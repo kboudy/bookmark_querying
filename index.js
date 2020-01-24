@@ -117,9 +117,8 @@ const deleteBookmarks = (bookmarkJson, flattened, urlsToDelete) => {
   const survivors = flattened.filter(f => !urlsToDelete.includes(f.url));
   stripped.roots.bookmark_bar.children = survivors;
   fs.writeFileSync(config.bookmarkPath, JSON.stringify(stripped));
+  console.log(chalk.white(`Deleted ${urlsToDelete.length} bookmarks:`));
   console.log(chalk.red(urlsToDelete.join("\n")));
-  console.log();
-  console.log(chalk.red(`Deleted ${urlsToDelete.length} bookmarks`));
 };
 
 const queryBookmarks = () => {
@@ -159,6 +158,7 @@ const queryBookmarks = () => {
 
     let outString = "";
     let isFirst = true;
+    const chalkColors = [chalk.blue, chalk.yellow, chalk.magenta, chalk.cyan];
     for (const f of outputFields) {
       let renderedField = b[f];
       if (f === "#") {
@@ -186,7 +186,7 @@ const queryBookmarks = () => {
         outString = outString + chalk.gray(config.delimiter);
       }
       isFirst = false;
-      outString = outString + `"${renderedField}"`;
+      outString = outString + `"${chalkColors.pop()(renderedField)}"`;
     }
     matches.push(b);
     console.log(chalk.white(outString));
