@@ -158,7 +158,7 @@ const queryBookmarks = () => {
 
     let outString = "";
     let isFirst = true;
-    const chalkColors = [chalk.blue, chalk.yellow, chalk.magenta, chalk.cyan];
+    const chalkColors = [chalk.blue, chalk.white, chalk.magenta, chalk.cyan];
     for (const f of outputFields) {
       let renderedField = b[f];
       if (f === "#") {
