@@ -186,7 +186,9 @@ const queryBookmarks = () => {
         outString = outString + chalk.gray(config.delimiter);
       }
       isFirst = false;
-      outString = outString + `"${chalkColors.pop()(renderedField)}"`;
+      const currentChalkColor = chalkColors.pop();
+      chalkColors.unshift(currentChalkColor); // keep colors rotating if need me
+      outString = outString + `"${currentChalkColor(renderedField)}"`;
     }
     matches.push(b);
     console.log(chalk.white(outString));
