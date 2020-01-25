@@ -191,7 +191,9 @@ const queryBookmarks = () => {
       outString = outString + `"${currentChalkColor(renderedField)}"`;
     }
     matches.push(b);
-    console.log(chalk.white(outString));
+    if (!argv.launch) {
+      console.log(chalk.white(outString));
+    }
   }
   if (argv.delete) {
     // because a yargs default (of "1") is supplied for the launch arg, it always says the switch is present
@@ -213,7 +215,9 @@ const queryBookmarks = () => {
       deleteBookmarks(bookmarkJson, flattened, urlsToDelete);
     }
   } else {
-    console.log(chalk.green(`${matches.length} bookmarks`));
+    if (!argv.launch) {
+      console.log(chalk.green(`${matches.length} bookmarks`));
+    }
   }
   if (argv.launch) {
     // because a yargs default (of "1") is supplied for the launch arg, it always says the switch is present
