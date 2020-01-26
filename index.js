@@ -112,6 +112,10 @@ const { argv } = require("yargs")
   .version(false)
   .options(argOptions);
 
+const launchSwitchExists =
+  process.argv.filter(a => a === "-l" || a === "-launch").length > 0;
+const launch = argv.launch && launchSwitchExists;
+
 const deleteBookmarks = (bookmarkJson, flattened, urlsToDelete) => {
   const stripped = stripBookmarks(bookmarkJson);
   const survivors = flattened.filter(f => !urlsToDelete.includes(f.url));
@@ -191,7 +195,7 @@ const queryBookmarks = () => {
       outString = outString + `"${currentChalkColor(renderedField)}"`;
     }
     matches.push(b);
-    if (!argv.launch) {
+    if (!launch) {
       console.log(chalk.white(outString));
     }
   }
@@ -215,29 +219,25 @@ const queryBookmarks = () => {
       deleteBookmarks(bookmarkJson, flattened, urlsToDelete);
     }
   } else {
-    if (!argv.launch) {
+    if (!launch) {
       console.log(chalk.green(`${matches.length} bookmarks`));
     }
   }
-  if (argv.launch) {
+  if (launch) {
     // because a yargs default (of "1") is supplied for the launch arg, it always says the switch is present
     // there must be a yargs way to check if it actually was typed, but for now, I'm manually checking
-    const launchSwitchExists =
-      process.argv.filter(a => a === "-l" || a === "-launch").length > 0;
-    if (launchSwitchExists) {
-      if (matches.length === 0) {
-        console.log(chalk.red("There were no matches to launch"));
+    if (matches.length === 0) {
+      console.log(chalk.red("There were no matches to launch"));
+    } else {
+      const launchIndex = parseInt(argv.launch) - 1;
+      if (isNaN(launchIndex)) {
+        console.log(
+          chalk.red(`"${argv.launch}": launch # should be an integer`)
+        );
+      } else if (launchIndex < 0 || launchIndex >= matches.length) {
+        console.log(chalk.red(`${argv.launch}: No such result # to launch`));
       } else {
-        const launchIndex = parseInt(argv.launch) - 1;
-        if (isNaN(launchIndex)) {
-          console.log(
-            chalk.red(`"${argv.launch}": launch # should be an integer`)
-          );
-        } else if (launchIndex < 0 || launchIndex >= matches.length) {
-          console.log(chalk.red(`${argv.launch}: No such result # to launch`));
-        } else {
-          opn(matches[launchIndex].url);
-        }
+        opn(matches[launchIndex].url);
       }
     }
   }
