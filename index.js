@@ -74,8 +74,8 @@ function formatAndLocalizeDate(st_dt) {
 const argOptions = {
   fields: {
     alias: "f",
-    type: "string",
-    description: "Comma-delimited field names (#,date_added,name,url)"
+    type: "array",
+    description: "field names (#,date_added,name,url)"
   },
   query: {
     alias: "q",
@@ -131,9 +131,9 @@ const queryBookmarks = () => {
 
   const availableFields = ["#", "date_added", "name", "url"];
   const outputFields = [];
-  for (const f of (argv.fields || availableFields.join(","))
-    .split(",")
-    .map(f => f.trim().toLowerCase())) {
+  for (const f of (argv.fields || availableFields).map(f =>
+    f.trim().toLowerCase()
+  )) {
     if (availableFields.includes(f)) {
       outputFields.push(f);
     }
