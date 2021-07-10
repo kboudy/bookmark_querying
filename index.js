@@ -6,6 +6,7 @@ const chalk = require("chalk"),
   homedir = require("os").homedir(),
   path = require("path"),
   moment = require("moment"),
+  mkdirp = require("mkdirp"),
   commonHelpers = require("./commonHelpers");
 
 const { gatherAllBookmarks, stripBookmarks } = commonHelpers;
@@ -47,7 +48,7 @@ if (!fs.existsSync(configFilepath)) {
       homedir,
       ".config/BraveSoftware/Brave-Browser/Default/Bookmarks"
     ),
-    delimiter: ","
+    delimiter: ",",
   };
   fs.writeFileSync(configFilepath, JSON.stringify(config));
 } else {
@@ -75,36 +76,36 @@ const argOptions = {
   fields: {
     alias: "f",
     type: "array",
-    description: "field names (#,date_added,name,url)"
+    description: "field names (#,date_added,name,url)",
   },
   query: {
     alias: "q",
     type: "string",
-    description: "regex for query (against the url & bookmark name)"
+    description: "regex for query (against the url & bookmark name)",
   },
   launch: {
     alias: "l",
     default: "1",
     type: "string",
     description:
-      "launch first url (or #'d, if you supply it) in default browser"
+      "launch first url (or #'d, if you supply it) in default browser",
   },
   delete: {
     alias: "d",
     default: "*",
     type: "string",
-    description: "delete queried bookmarks"
+    description: "delete queried bookmarks",
   },
   sort: {
     alias: "s",
     type: "boolean",
-    description: "sort by date added"
+    description: "sort by date added",
   },
   sort_descending: {
     alias: "S",
     type: "boolean",
-    description: "sort by date added, descending"
-  }
+    description: "sort by date added, descending",
+  },
 };
 
 const { argv } = require("yargs")
@@ -113,12 +114,12 @@ const { argv } = require("yargs")
   .options(argOptions);
 
 const launchSwitchExists =
-  process.argv.filter(a => a === "-l" || a === "-launch").length > 0;
+  process.argv.filter((a) => a === "-l" || a === "-launch").length > 0;
 const launch = argv.launch && launchSwitchExists;
 
 const deleteBookmarks = (bookmarkJson, flattened, urlsToDelete) => {
   const stripped = stripBookmarks(bookmarkJson);
-  const survivors = flattened.filter(f => !urlsToDelete.includes(f.url));
+  const survivors = flattened.filter((f) => !urlsToDelete.includes(f.url));
   stripped.roots.bookmark_bar.children = survivors;
   fs.writeFileSync(config.bookmarkPath, JSON.stringify(stripped));
   console.log(chalk.white(`Deleted ${urlsToDelete.length} bookmarks:`));
@@ -131,7 +132,7 @@ const queryBookmarks = () => {
 
   const availableFields = ["#", "date_added", "name", "url"];
   const outputFields = [];
-  for (const f of (argv.fields || availableFields).map(f =>
+  for (const f of (argv.fields || availableFields).map((f) =>
     f.trim().toLowerCase()
   )) {
     if (availableFields.includes(f)) {
@@ -203,13 +204,13 @@ const queryBookmarks = () => {
     // because a yargs default (of "1") is supplied for the launch arg, it always says the switch is present
     // there must be a yargs way to check if it actually was typed, but for now, I'm manually checking
     const deleteSwitchExists =
-      process.argv.filter(a => a === "-d" || a === "-delete").length > 0;
+      process.argv.filter((a) => a === "-d" || a === "-delete").length > 0;
     if (deleteSwitchExists) {
-      let urlsToDelete = matches.map(m => m.url);
+      let urlsToDelete = matches.map((m) => m.url);
       if (argv.delete !== "*") {
         const lineNumbersToDelete = argv.delete
           .split(",")
-          .map(n => parseInt(n));
+          .map((n) => parseInt(n));
         const newUrls = [];
         for (const l of lineNumbersToDelete) {
           newUrls.push(urlsToDelete[l - 1]);
